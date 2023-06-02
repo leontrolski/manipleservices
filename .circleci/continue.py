@@ -80,9 +80,21 @@ def python_package(package: str) -> Job:
     )
 
 
+def empty_job() -> Job:
+    return Job(
+        docker=[Docker(image="cimg/python:3.11.3")],
+        steps=[
+            "checkout",
+        ],
+    )
+
+
 def make_config(changed_packages: list[str]) -> Config:
     jobs_map = {f"build-and-test-{p}": python_package(p) for p in changed_packages}
     job_names = [f"build-and-test-{p}" for p in changed_packages]
+    if not job_names:
+        jobs_map = {"build-and-test-nothing": empty_job()}
+        job_names = ["build-and-test-nothing"]
     return Config(
         version=2.1,
         jobs=jobs_map,
