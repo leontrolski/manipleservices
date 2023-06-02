@@ -1,0 +1,21 @@
+[project]
+name = "account"
+version = "0.0.1"
+description = "Account Component"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+  "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=23.1.0",
+  "pytest>=7.3.1",
+  "mypy>=1.3.0",
+  "freezegun>=1.2.2",
+]
+
+[tool.setuptools.package-data]
+account = ["py.typed"]

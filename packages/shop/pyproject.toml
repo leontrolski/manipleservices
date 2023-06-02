@@ -1,0 +1,22 @@
+[project]
+name = "shop"
+version = "0.0.1"
+description = "Shop Component"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+  "click>=8.1.3",
+  "account @ file:///tmp/maniple-packages/account",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=23.1.0",
+  "pytest>=7.3.1",
+  "mypy>=1.3.0",
+  "account[dev] @ file:///tmp/maniple-packages/account",
+]
+
+[tool.setuptools.package-data]
+account = ["py.typed"]
