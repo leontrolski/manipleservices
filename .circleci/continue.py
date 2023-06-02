@@ -5,8 +5,6 @@ import json
 import os
 
 StepName = L["checkout"]
-JobName = L["say-goodbye"]
-WorkflowName = L["say-goodbye-workflow"]
 
 
 @dataclass
@@ -33,33 +31,46 @@ class Job:
 
 @dataclass
 class WorkflowJob:
-    jobs: list[JobName]
+    jobs: list[str]
 
 
 @dataclass
 class Config:
     version: float
-    jobs: dict[JobName, Job]
-    workflows: dict[WorkflowName, WorkflowJob]
+    jobs: dict[str, Job]
+    workflows: dict[str, WorkflowJob]
 
+
+def python_package(package: str) -> Job:
+    cd = f"cd packages/{package} \n"
+    return Job(
+        docker=[Docker(image="cimg/python:3.11.3")],
+        steps=[
+            "checkout",
+            Step(
+                Run(
+                    name="pip install",
+                    command=cd + "pip install -e '.[dev]'",
+                )
+            ),
+            Step(
+                Run(
+                    name="pytest",
+                    command=cd + "pytest -vv",
+                )
+            ),
+        ],
+    )
+
+
+package_names = ["account"]
+jobs_map = {f"build-and-test-{p}": python_package(p) for p in package_names}
+job_names = [f"build-and-test-{p}" for p in package_names]
 
 config = Config(
     version=2.1,
-    jobs={
-        "say-goodbye": Job(
-            docker=[Docker(image="cimg/base:stable")],
-            steps=[
-                "checkout",
-                Step(
-                    Run(
-                        name="Say hello",
-                        command="echo Goodbye!",
-                    )
-                ),
-            ],
-        ),
-    },
-    workflows={"say-goodbye-workflow": WorkflowJob(jobs=["say-goodbye"])},
+    jobs=jobs_map,
+    workflows={"build-and-test": WorkflowJob(jobs=job_names)},
 )
 
 
