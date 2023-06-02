@@ -1,6 +1,7 @@
 import datetime as dt
 from dataclasses import dataclass
 
+
 @dataclass
 class User:
     created: dt.datetime

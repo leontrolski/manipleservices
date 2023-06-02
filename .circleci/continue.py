@@ -54,13 +54,25 @@ def python_package(package: str) -> Job:
             "checkout",
             Step(
                 Run(
+                    name="symlink packages for install",
+                    command="ln -s $PWD/packages /tmp/maniple-packages",
+                )
+            ),
+            Step(
+                Run(
                     name="pip install",
                     command=cd + "pip install -e '.[dev]'",
                 )
             ),
             Step(
                 Run(
-                    name="pytest",
+                    name="lint",
+                    command=cd + "mypy src",
+                )
+            ),
+            Step(
+                Run(
+                    name="test",
                     command=cd + "pytest -vv",
                 )
             ),
