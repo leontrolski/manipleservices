@@ -1,10 +1,15 @@
 from dataclasses import dataclass, asdict
-from typing import Literal as L
 import http.client
 import json
+import subprocess
+from typing import Literal as L
 import os
 
 StepName = L["checkout"]
+
+
+def sh(cmd: str) -> str:
+    return subprocess.check_output(cmd, shell=True).decode()
 
 
 @dataclass
@@ -63,15 +68,14 @@ def python_package(package: str) -> Job:
     )
 
 
-package_names = ["account"]
-jobs_map = {f"build-and-test-{p}": python_package(p) for p in package_names}
-job_names = [f"build-and-test-{p}" for p in package_names]
-
-config = Config(
-    version=2.1,
-    jobs=jobs_map,
-    workflows={"build-and-test": WorkflowJob(jobs=job_names)},
-)
+def make_config(changed_packages: list[str]) -> Config:
+    jobs_map = {f"build-and-test-{p}": python_package(p) for p in changed_packages}
+    job_names = [f"build-and-test-{p}" for p in changed_packages]
+    return Config(
+        version=2.1,
+        jobs=jobs_map,
+        workflows={"build-and-test": WorkflowJob(jobs=job_names)},
+    )
 
 
 def run_config(config_typed: Config) -> None:
@@ -89,5 +93,19 @@ def run_config(config_typed: Config) -> None:
     print(data.decode("utf-8"))
 
 
+def changed_packages() -> set[str]:
+    return {
+        path.split("/")[1]
+        for path in sh("git diff main HEAD --name-only").splitlines()
+        if path.startswith("packages/")
+    }
+
+
+def add_dependant_packages(packages: set[str]) -> list[str]:
+    return sorted(packages)
+
+
 if __name__ == "__main__":
-    run_config(config)
+    packages = add_dependant_packages(changed_packages())
+    print(f"Running CI for packages: {packages}")
+    run_config(make_config(packages))
