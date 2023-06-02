@@ -1,0 +1,17 @@
+version: 2.1
+
+setup: true
+jobs:
+  run-generated-config:
+    docker:
+      - image: cimg/base:2023.05
+    steps:
+      - checkout
+      - run:
+          name: "Run generated config"
+          command: "python3 .circleci/continue.py"
+
+workflows:
+  run-generated-config-workflow:
+    jobs:
+      - run-generated-config
