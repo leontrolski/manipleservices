@@ -1,4 +1,4 @@
-# `manipleservices`
+# [`manipleservices`](https://leontrolski.github.io/manipleservices.html)
 
 A repository demonstrating:
 
